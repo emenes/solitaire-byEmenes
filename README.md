@@ -1,4 +1,4 @@
-# 🃏 Solitaire (Klondike) - Version 7.0
+# 🃏 Solitaire (Klondike) - Version 8.0
 
 Welcome to **Solitaire by Emenes Interactive**! This is a simple modern, feature-rich edition of the classic Klondike Solitaire game. Built entirely using native HTML5, CSS3, and pure JavaScript (no external dependencies), this version is enhanced with custom sound effects, vibrant visual styling, state backup management, and a smart assistance engine.
 
