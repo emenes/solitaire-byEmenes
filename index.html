@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLITAIRE V7.0</title>
+    <title>SOLITAIRE V8.1</title>
     <!-- Awesome Font for Title -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,7 @@
             /* Card Design Variable */
             --card-back-bg: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 8px), linear-gradient(135deg, #0a1710 0%, #163625 100%);
             
-            /* V7 Responsive Layout Variables */
+            /* Responsive Layout Variables */
             --card-w: 90px;
             --card-h: 130px;
             --card-gap: 15px;
@@ -160,20 +160,10 @@
         button.btn-auto-solve {
             background-color: #ffb703;
             color: #12291d;
-            border: 2px solid #fff;
-            animation: pulse 1.5s infinite;
-            font-weight: 800;
         }
 
         button.btn-auto-solve:hover {
             background-color: #fb8500;
-            transform: scale(1.05);
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 5px #ffb703; }
-            50% { box-shadow: 0 0 15px #ffb703; }
-            100% { box-shadow: 0 0 5px #ffb703; }
         }
 
         /* Sidebar Styling */
@@ -571,21 +561,29 @@
             color: #856404;
         }
 
-        /* Fixed How to Play Button */
-        .btn-how-to {
+        /* Bottom Controls (Reset, Undo, How to Play) */
+        .bottom-controls {
             position: fixed;
             bottom: 30px;
             right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .btn-bottom {
             border-radius: 30px;
             padding: 12px 24px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 100;
             background-color: #1a422e;
             border: 2px solid var(--accent);
             font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .btn-how-to:hover {
+        .btn-bottom:hover {
             background-color: var(--accent);
             transform: translateY(-3px) scale(1.02);
         }
@@ -602,7 +600,7 @@
             width: 100%;
         }
 
-        /* V7 Mobile Responsiveness Setup */
+        /* Mobile Responsiveness Setup */
         @media (max-width: 768px) {
             :root {
                 --card-w: 13vw;
@@ -623,7 +621,17 @@
             .controls { flex-wrap: wrap; justify-content: center; }
             button { font-size: 0.8rem; padding: 6px 10px; }
             h1 { font-size: 1.8rem; }
-            .btn-how-to { bottom: 10px; right: 10px; padding: 10px 15px; font-size: 0.8rem; }
+            
+            .bottom-controls {
+                bottom: 10px;
+                right: 10px;
+                gap: 5px;
+            }
+            .btn-bottom {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
             .card-slot { border-width: 1px; }
             .card { border-width: 1px; }
             .board { gap: 20px; }
@@ -638,14 +646,13 @@
             <h1>SOLITAIRE</h1>
         </div>
         <div class="header-info">
-            <div class="score-board">Score: <span id="scoreValue">0</span></div>
+            <div class="score-board">Time: <span id="timerValue">00:00</span></div>
             <div class="controls">
                 <button id="btnAutoSolve" class="btn-auto-solve" onclick="triggerAutoSolveComplete()" style="display: none;" title="All cards revealed! Auto complete the game">Auto Solve ⭐</button>
-                <button class="btn-hint" onclick="triggerHint()" title="Get a hint (-5 points)">Hint</button>
+                <button class="btn-hint" onclick="triggerHint()" title="Get a hint">Hint</button>
                 <button class="btn-solve" onclick="triggerSolve()" title="Instantly complete the game">Solve</button>
                 <button onclick="startNewGame()" title="Start a brand new game">New Game</button>
-                <button onclick="saveBackup()" title="Download current progress">Save Backup</button>
-                <button onclick="document.getElementById('fileInput').click()" title="Load previous progress">Load Backup</button>
+                <button onclick="openBackupModal()" title="Save or Load your game">Backup</button>
                 <input type="file" id="fileInput" style="display: none" accept=".json">
             </div>
         </div>
@@ -685,8 +692,21 @@
         </div>
     </div>
 
-    <!-- Modals for Features -->
-    
+    <!-- Backup Modal -->
+    <div class="modal-overlay" id="backupModal">
+        <div class="modal-content">
+            <h2>Backup Game</h2>
+            <p>Choose an action for your game progress.</p>
+            <div class="modal-buttons">
+                <button onclick="saveBackup(); closeCustomModal('backupModal')">Save Backup</button>
+                <button onclick="document.getElementById('fileInput').click(); closeCustomModal('backupModal')">Load Backup</button>
+            </div>
+            <div class="modal-buttons" style="margin-top: 10px;">
+                <button class="btn-cancel" onclick="closeCustomModal('backupModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Setting Modal -->
     <div class="modal-overlay" id="settingModal">
         <div class="modal-content">
@@ -771,12 +791,12 @@
                     <li><strong>Recycling the Stock:</strong> When the stock pile runs out, click the empty slot to flip the waste pile over and recycle the cards.</li>
                 </ul>
 
-                <h3>🏆 Scoring System & Features (V7)</h3>
+                <h3>🏆 Features (V8.1)</h3>
                 <ul>
-                    <li>Moving a card into any of the 4 Foundation slots gives you <strong>+10 points</strong>.</li>
-                    <li>Moving a card OUT of the Foundation slot will deduct <strong>-10 points</strong> from your score.</li>
-                    <li><span class="highlight-text">Note:</span> Moving cards between the Tableau and the Waste piles does NOT affect your score. Only moves into the Foundation count!</li>
-                    <li><strong>Auto Solve:</strong> When all face-down cards are completely revealed, a shiny ⭐ Auto Solve button will appear to automatically finish your game and tabulate your winning score!</li>
+                    <li><strong>Live Timer:</strong> Timer will start automatically upon your first move! Finish the game to record your time.</li>
+                    <li><strong>Auto Solve:</strong> When all face-down cards are completely revealed, a shiny ⭐ Auto Solve button will appear to automatically finish your game!</li>
+                    <li><strong>Reset & Undo:</strong> Rearrange cards to the initial state, or simply undo your latest move.</li>
+                    <li><strong>Auto Save:</strong> Game will continuously save via LocalStorage. You can resume anytime even after closing the browser!</li>
                 </ul>
             </div>
             <div class="modal-buttons">
@@ -785,12 +805,17 @@
         </div>
     </div>
 
-    <button class="btn-how-to" onclick="openDocModal()" title="View Game Rules">How to play</button>
+    <!-- Bottom Controls -->
+    <div class="bottom-controls">
+        <button class="btn-bottom" onclick="triggerReset()" title="Reset cards to starting state">Reset</button>
+        <button class="btn-bottom" onclick="triggerUndo()" title="Undo last move">Undo</button>
+        <button class="btn-bottom" onclick="openDocModal()" title="View Game Rules">How to play</button>
+    </div>
 
-    <footer>SOLITAIRE BY EMENES INTERACTIVE (V7.0)</footer>
+    <footer>SOLITAIRE BY EMENES INTERACTIVE (V8.1)</footer>
 
     <script>
-        // --- V7.0 Features Logic --- //
+        // --- V8.1 Audio Logic --- //
         let audioCtx;
         function initAudio() {
             if(!audioCtx) {
@@ -848,6 +873,10 @@
 
         function closeCustomModal(id) {
             document.getElementById(id).classList.remove('active');
+        }
+
+        function openBackupModal() {
+            openCustomModal('backupModal');
         }
 
         function updateSettings() {
@@ -922,18 +951,49 @@
             applyBackground();
         }
 
+        // --- Timer Logic (V8.1) --- //
+        let timerInterval = null;
+        
+        function startTimer() {
+            if (!gameState.timerStarted) {
+                gameState.timerStarted = true;
+                timerInterval = setInterval(() => {
+                    gameState.timeElapsed++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(gameState.timeElapsed / 60).toString().padStart(2, '0');
+            let s = (gameState.timeElapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timerValue').innerText = `${m}:${s}`;
+        }
+
         // --- Game Logic --- //
         const suits = ['♥', '♦', '♣', '♠'];
         const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
         const colors = { '♥': 'red', '♦': 'red', '♣': 'black', '♠': 'black' };
         
         let gameState = {
-            score: 0,
+            timeElapsed: 0,
+            timerStarted: false,
             stock: [],
             waste: [],
             foundations: [[], [], [], []],
             tableau: [[], [], [], [], [], [], []]
         };
+
+        // States for Undo and Reset
+        let initialState = null;
+        let moveHistory = [];
 
         let dragSource = null;
         let confirmCallback = null;
@@ -970,17 +1030,12 @@
             closeModal();
         }
 
-        // Documentation Modal Logic
         function openDocModal() {
             document.getElementById('docModalOverlay').classList.add('active');
         }
 
         function closeDocModal() {
             document.getElementById('docModalOverlay').classList.remove('active');
-        }
-
-        function updateScoreDisplay() {
-            document.getElementById('scoreValue').innerText = gameState.score;
         }
 
         // Deck Generation & Shuffling
@@ -1011,9 +1066,11 @@
 
         // Game Initialization
         function startNewGame() {
+            stopTimer();
             let deck = shuffle(createDeck());
             gameState = {
-                score: 0,
+                timeElapsed: 0,
+                timerStarted: false,
                 stock: [],
                 waste: [],
                 foundations: [[], [], [], []],
@@ -1028,8 +1085,19 @@
                 }
             }
             gameState.stock = deck;
-            updateScoreDisplay();
+            
+            // Set initial state for reset feature and clear history
+            initialState = JSON.parse(JSON.stringify(gameState));
+            moveHistory = [];
+            
+            updateTimerDisplay();
             renderBoard();
+            saveToLocalStorage();
+        }
+
+        // V8 History Saving
+        function saveStateToHistory() {
+            moveHistory.push(JSON.parse(JSON.stringify(gameState)));
         }
 
         // Render HTML based on State
@@ -1076,7 +1144,7 @@
                 });
             }
             
-            // V7.0 Auto Solve Verification
+            // V7/V8 Auto Solve Verification
             const autoSolveBtn = document.getElementById('btnAutoSolve');
             if (autoSolveBtn) {
                 if (checkAutoSolveAvailable()) {
@@ -1175,6 +1243,9 @@
 
         // Interactions & Rules
         function drawCard() {
+            saveStateToHistory();
+            startTimer();
+
             if (gameState.stock.length > 0) {
                 let card = gameState.stock[gameState.stock.length - 1];
                 animateStateChange(() => {
@@ -1183,6 +1254,7 @@
                     gameState.waste.push(c);
                     playSound();
                     renderBoard();
+                    saveToLocalStorage();
                 }, [card]);
             } else if (gameState.waste.length > 0) {
                 let cards = [...gameState.waste];
@@ -1191,6 +1263,7 @@
                     gameState.waste = [];
                     playSound();
                     renderBoard();
+                    saveToLocalStorage();
                 }, cards);
             }
         }
@@ -1291,21 +1364,16 @@
         }
 
         function executeMove(source, target, cardsToMove) {
+            saveStateToHistory();
+            startTimer();
+
             animateStateChange(() => {
                 if (source.type === 'waste') gameState.waste.pop();
-                if (source.type === 'foundation') {
-                    gameState.foundations[source.index].pop();
-                    gameState.score -= 10; 
-                }
+                if (source.type === 'foundation') gameState.foundations[source.index].pop();
                 if (source.type === 'tableau') gameState.tableau[source.col].splice(source.row);
 
-                if (target.type === 'foundation') {
-                    gameState.foundations[target.index].push(cardsToMove[0]);
-                    gameState.score += 10;
-                }
-                if (target.type === 'tableau') {
-                    gameState.tableau[target.index].push(...cardsToMove);
-                }
+                if (target.type === 'foundation') gameState.foundations[target.index].push(cardsToMove[0]);
+                if (target.type === 'tableau') gameState.tableau[target.index].push(...cardsToMove);
 
                 if (source.type === 'tableau' && gameState.tableau[source.col].length > 0) {
                     let revealedCard = gameState.tableau[source.col][gameState.tableau[source.col].length - 1];
@@ -1315,24 +1383,54 @@
                 }
                 
                 playSound();
-                updateScoreDisplay();
                 renderBoard();
+                saveToLocalStorage();
             }, cardsToMove);
         }
 
-        // --- V7.0 Auto Solve Logic --- //
+        // --- V8 Reset & Undo Features --- //
+        function triggerUndo() {
+            if (moveHistory.length > 0) {
+                gameState = moveHistory.pop();
+                updateTimerDisplay();
+                renderBoard();
+                saveToLocalStorage();
+                playSound();
+            } else {
+                showModal("Cannot Undo", "There are no moves to undo.");
+            }
+        }
+
+        function triggerReset() {
+            if (!initialState) return;
+            showModal(
+                "Reset Game", 
+                "Warning: All cards will be reset to their initial state. Time and moves will be cleared. Continue?", 
+                true, 
+                () => {
+                    gameState = JSON.parse(JSON.stringify(initialState));
+                    gameState.timeElapsed = 0;
+                    gameState.timerStarted = false;
+                    moveHistory = [];
+                    stopTimer();
+                    updateTimerDisplay();
+                    renderBoard();
+                    saveToLocalStorage();
+                    playSound();
+                }
+            );
+        }
+
+        // --- Auto Solve Logic --- //
         function checkAutoSolveAvailable() {
-            // Semua kad di Stock Pile mesti kosong
             if (gameState.stock.length > 0) return false;
             
-            // Semua kad di Tableau mesti telah diterbalikkan faceUp
             for (let i = 0; i < 7; i++) {
                 for (let card of gameState.tableau[i]) {
                     if (!card.faceUp) return false;
                 }
             }
             
-            // Pastikan game belum menang
             const won = gameState.foundations.every(f => f.length === 13);
             if (won) return false;
 
@@ -1340,15 +1438,9 @@
         }
 
         function triggerAutoSolveComplete() {
-            // Tambahkan 10 mata secara automatik untuk setiap kad yang berjaya dipindahkan
-            let cardsToMove = 0;
-            cardsToMove += gameState.waste.length;
-            gameState.tableau.forEach(col => cardsToMove += col.length);
-            
-            gameState.score += (cardsToMove * 10);
-            updateScoreDisplay();
+            saveStateToHistory();
+            stopTimer();
 
-            // Pindahkan kesemua kad terus ke Foundations
             gameState.stock = [];
             gameState.waste = [];
             gameState.tableau = [[], [], [], [], [], [], []];
@@ -1369,17 +1461,14 @@
             
             playSound();
             renderBoard();
+            saveToLocalStorage();
         }
 
         // --- Hint Feature --- //
         function triggerHint() {
-            if (gameState.score < 5) {
-                showModal("Not Enough Score", `You need at least 5 points to use a hint. Current score: ${gameState.score}`);
-                return;
-            }
             showModal(
                 "Use Hint?", 
-                "Using a hint will deduct 5 points from your score and automatically resolve one card. Continue?", 
+                "Using a hint will automatically complete one move. Continue?", 
                 true, 
                 executeHint
             );
@@ -1389,11 +1478,10 @@
             let move = findHintMove();
             
             if (!move) {
-                showModal("No Moves Available", "There are no valid moves on the board right now. Try drawing a card from the stock.");
+                showModal("No Moves Available", "There are no valid moves on the board right now. Please draw a new card.");
                 return;
             }
 
-            gameState.score -= 5;
             executeMove(move.source, move.target, move.cards);
 
             setTimeout(() => {
@@ -1490,15 +1578,15 @@
         function triggerSolve() {
             showModal(
                 "Warning", 
-                "If you use Solve, the system will solve everything and you will get 0 points. Continue?", 
+                "If you use the Solve button, the system will automatically solve the game. Continue?", 
                 true, 
                 executeSolve
             );
         }
 
         function executeSolve() {
-            gameState.score = 0;
-            updateScoreDisplay();
+            saveStateToHistory();
+            stopTimer();
             
             gameState.stock = [];
             gameState.waste = [];
@@ -1519,21 +1607,66 @@
             }
             
             renderBoard();
+            saveToLocalStorage();
             setTimeout(() => {
-                showModal("Solved", "The game has been automatically solved. No points awarded.");
+                showModal("Solved", "The game has been automatically solved.");
             }, 400);
         }
 
         function checkWinCondition() {
             const won = gameState.foundations.every(f => f.length === 13);
             if (won) {
+                stopTimer();
+                gameState.timerStarted = false;
+                
+                let m = Math.floor(gameState.timeElapsed / 60).toString().padStart(2, '0');
+                let s = (gameState.timeElapsed % 60).toString().padStart(2, '0');
+                
                 setTimeout(() => {
-                    showModal("Congratulations!", `You have won the game! Final Score: ${gameState.score}`);
+                    showModal("Congratulations!", `You have won the game!\nTime Recorded: ${m}:${s}`);
                 }, 300);
             }
         }
 
-        // Save & Load Functions
+        // --- Save, Load & LocalStorage Functions --- //
+        function saveToLocalStorage() {
+            const data = {
+                gameState: gameState,
+                initialState: initialState,
+                moveHistory: moveHistory
+            };
+            localStorage.setItem('solitaire_v8.1_save', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('solitaire_v8.1_save');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.gameState && data.gameState.tableau) {
+                        gameState = data.gameState;
+                        initialState = data.initialState || null;
+                        moveHistory = data.moveHistory || [];
+                        
+                        updateTimerDisplay();
+                        if (gameState.timerStarted) {
+                            // Resume timer if it was running
+                            timerInterval = setInterval(() => {
+                                gameState.timeElapsed++;
+                                updateTimerDisplay();
+                            }, 1000);
+                        }
+                        
+                        renderBoard();
+                        return true;
+                    }
+                } catch (err) {
+                    console.error("Local storage data corrupted.", err);
+                }
+            }
+            return false;
+        }
+
         function saveBackup() {
             const dataStr = JSON.stringify(gameState);
             const blob = new Blob([dataStr], { type: "application/json" });
@@ -1541,7 +1674,7 @@
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = "solitaire_game.json";
+            a.download = "solitaire_game_v8.1.json";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1554,8 +1687,8 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            if (file.name !== "solitaire_game.json") {
-                showModal("Error", "Invalid File Name. Only 'solitaire_game.json' is accepted.");
+            if (file.name !== "solitaire_game_v8.1.json" && file.name !== "solitaire_game_v8.json" && file.name !== "solitaire_game.json") {
+                showModal("Error", "Invalid file name. Please use 'solitaire_game_v8.1.json'.");
                 this.value = ''; 
                 return;
             }
@@ -1564,10 +1697,12 @@
             reader.onload = function(e) {
                 try {
                     const loadedState = JSON.parse(e.target.result);
-                    if (loadedState.stock && loadedState.waste && loadedState.foundations && loadedState.tableau && loadedState.score !== undefined) {
+                    if (loadedState.stock && loadedState.waste && loadedState.foundations && loadedState.tableau) {
+                        stopTimer();
                         gameState = loadedState;
-                        updateScoreDisplay();
+                        updateTimerDisplay();
                         renderBoard();
+                        saveToLocalStorage();
                         showModal("Backup Loaded", "Your game state has been successfully restored.");
                     } else {
                         throw new Error("Invalid structure");
@@ -1580,10 +1715,13 @@
             this.value = ''; 
         });
 
-        // Initialize v7 settings and start game on load
+        // Initialize settings and start game on load
         window.onload = function() {
             initV6Features();
-            startNewGame();
+            // Try loading from Local Browser cache first
+            if (!loadFromLocalStorage()) {
+                startNewGame();
+            }
         };
     </script>
 </body>
