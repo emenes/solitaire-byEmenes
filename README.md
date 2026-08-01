@@ -1,4 +1,4 @@
-# 🃏 Solitaire (Klondike) - Version 5.0
+# 🃏 Solitaire (Klondike) - Version 7.0
 
 Welcome to **Solitaire v5.0**! This is a modern, feature-rich edition of the classic Klondike Solitaire game. Built entirely using native HTML5, CSS3, and pure JavaScript (no external dependencies), this version is enhanced with custom sound effects, vibrant visual styling, state backup management, and a smart assistance engine.
 
@@ -8,7 +8,7 @@ Launch the game directly in your web browser here:
 
 ---
 
-## ✨ Features in v5.0 & v4.0
+## ✨ Features
 
 *   **💡 Smart AI Hint Engine:** Stuck on a board state? Use the Hint system! It consumes 5 score points to automatically identify and execute the most optimal move, highlighting the newly moved card with a prominent 3-second golden glow animation.
 *   **🧩 Instant Auto-Solve:** Want to see the victory state immediately? The Solve feature programmatically completes the entire board with a single click (sets final score to 0).
