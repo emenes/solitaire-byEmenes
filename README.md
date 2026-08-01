@@ -40,4 +40,4 @@ Launch the game directly in your web browser here:
 *   **Vanilla JavaScript (ES6)** - Predictive layout validation logic, board state calculation algorithms, local client-side JSON I/O, and mathematical procedural wave generation for Web Audio.
 
 ---
-Published by **EMENES INTERACTIVE** | Stable Release v5.0 (2026)
+Published by **EMENES INTERACTIVE** | Stable Release (2026)
