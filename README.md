@@ -4,7 +4,7 @@ Welcome to **Solitaire v5.0**! This is a modern, feature-rich edition of the cla
 
 ## 🚀 Play Now (Direct Game Link)
 Launch the game directly in your web browser here:
-👉 **[CLICK HERE TO PLAY SOLITAIRE v5.0](https://emenes.github.io/solitaire-byEmenes/)**
+👉 **[CLICK HERE TO PLAY SOLITAIRE](https://emenes.github.io/solitaire-byEmenes/)**
 
 ---
 
