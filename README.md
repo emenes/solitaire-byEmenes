@@ -1,6 +1,6 @@
 # 🃏 Solitaire (Klondike) - Version 7.0
 
-Welcome to **Solitaire v5.0**! This is a modern, feature-rich edition of the classic Klondike Solitaire game. Built entirely using native HTML5, CSS3, and pure JavaScript (no external dependencies), this version is enhanced with custom sound effects, vibrant visual styling, state backup management, and a smart assistance engine.
+Welcome to **Solitaire by Emenes Interactive**! This is a simple modern, feature-rich edition of the classic Klondike Solitaire game. Built entirely using native HTML5, CSS3, and pure JavaScript (no external dependencies), this version is enhanced with custom sound effects, vibrant visual styling, state backup management, and a smart assistance engine.
 
 ## 🚀 Play Now (Direct Game Link)
 Launch the game directly in your web browser here:
@@ -27,8 +27,6 @@ Launch the game directly in your web browser here:
 
 ### 📊 Scoring System Breakdown
 *   Moving a card to the Foundation: `+10 Points`
-*   Moving a card from Waste to Tableau: `+5 Points`
-*   Flipping a face-down card open on the Tableau: `+5 Points`
 *   Pulling a card back OUT of the Foundation into the Tableau: `-10 Points`
 *   Requesting a Smart Hint: `-5 Points`
 
