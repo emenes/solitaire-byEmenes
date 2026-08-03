@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLITAIRE V8.1</title>
+    <title>SOLITAIRE V8.3</title>
     <!-- Awesome Font for Title -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -429,6 +429,25 @@
             padding: 12px;
             font-size: 1rem;
         }
+        
+        .difficulty-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .difficulty-btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
 
         .btn-cancel {
             background-color: var(--danger) !important;
@@ -561,7 +580,7 @@
             color: #856404;
         }
 
-        /* Bottom Controls (Reset, Undo, How to Play) */
+        /* Bottom Controls (Reset, Undo, How to Play, Difficulty) */
         .bottom-controls {
             position: fixed;
             bottom: 30px;
@@ -626,6 +645,8 @@
                 bottom: 10px;
                 right: 10px;
                 gap: 5px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
             }
             .btn-bottom {
                 padding: 8px 12px;
@@ -703,6 +724,23 @@
             </div>
             <div class="modal-buttons" style="margin-top: 10px;">
                 <button class="btn-cancel" onclick="closeCustomModal('backupModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Difficulty Modal (V8.3) -->
+    <div class="modal-overlay" id="difficultyModal">
+        <div class="modal-content">
+            <h2>Select Difficulty</h2>
+            <p>Choose your challenge level to begin:</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="difficulty-btn" onclick="setDifficulty('Easy')">Too Easy (Draw 1)</button>
+                <button class="difficulty-btn" onclick="setDifficulty('Medium')">Easy (Draw 2)</button>
+                <button class="difficulty-btn" onclick="setDifficulty('Hard')">Medium (Draw 3)</button>
+                <button class="difficulty-btn" onclick="setDifficulty('Master')">Hard 1 (Draw 3)</button>
+                <button class="difficulty-btn" onclick="setDifficulty('Expert')">Hard 2 (Draw 3)</button>
+                
+                <button id="resumeGameBtn" style="background: transparent; border: 2px solid var(--accent); color: var(--accent); font-weight: bold; margin-top: 15px; box-shadow: none;" onmouseover="this.style.background='var(--accent)'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='var(--accent)'" onclick="resumePreviousGame()">Resume Previous Game</button>
             </div>
         </div>
     </div>
@@ -791,8 +829,9 @@
                     <li><strong>Recycling the Stock:</strong> When the stock pile runs out, click the empty slot to flip the waste pile over and recycle the cards.</li>
                 </ul>
 
-                <h3>🏆 Features (V8.1)</h3>
+                <h3>🏆 Features (V8.3)</h3>
                 <ul>
+                    <li><strong>Difficulty Level:</strong> Choose from 5 different challenge modes affecting deck layout and draw count. Change anytime via the Difficulty button!</li>
                     <li><strong>Live Timer:</strong> Timer will start automatically upon your first move! Finish the game to record your time.</li>
                     <li><strong>Auto Solve:</strong> When all face-down cards are completely revealed, a shiny ⭐ Auto Solve button will appear to automatically finish your game!</li>
                     <li><strong>Reset & Undo:</strong> Rearrange cards to the initial state, or simply undo your latest move.</li>
@@ -807,15 +846,16 @@
 
     <!-- Bottom Controls -->
     <div class="bottom-controls">
+        <button class="btn-bottom" onclick="triggerChangeDifficulty()" title="Change game difficulty">Difficulty</button>
         <button class="btn-bottom" onclick="triggerReset()" title="Reset cards to starting state">Reset</button>
         <button class="btn-bottom" onclick="triggerUndo()" title="Undo last move">Undo</button>
         <button class="btn-bottom" onclick="openDocModal()" title="View Game Rules">How to play</button>
     </div>
 
-    <footer>SOLITAIRE BY EMENES INTERACTIVE (V8.1)</footer>
+    <footer>SOLITAIRE BY EMENES INTERACTIVE (V8.3)</footer>
 
     <script>
-        // --- V8.1 Audio Logic --- //
+        // --- V8 Audio Logic --- //
         let audioCtx;
         function initAudio() {
             if(!audioCtx) {
@@ -951,7 +991,7 @@
             applyBackground();
         }
 
-        // --- Timer Logic (V8.1) --- //
+        // --- Timer Logic --- //
         let timerInterval = null;
         
         function startTimer() {
@@ -988,15 +1028,23 @@
             stock: [],
             waste: [],
             foundations: [[], [], [], []],
-            tableau: [[], [], [], [], [], [], []]
+            tableau: [[], [], [], [], [], [], []],
+            difficulty: {
+                level: 'Medium',
+                drawCount: 2
+            }
         };
 
-        // States for Undo and Reset
         let initialState = null;
         let moveHistory = [];
 
+        // Global Drag/Touch Variables
         let dragSource = null;
         let confirmCallback = null;
+        let touchDragElement = null;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isDragging = false;
 
         // General Modal Logic
         function showModal(title, message, isConfirm = false, callback = null) {
@@ -1024,9 +1072,7 @@
         }
 
         function handleModalOk() {
-            if (confirmCallback) {
-                confirmCallback();
-            }
+            if (confirmCallback) confirmCallback();
             closeModal();
         }
 
@@ -1038,7 +1084,7 @@
             document.getElementById('docModalOverlay').classList.remove('active');
         }
 
-        // Deck Generation & Shuffling
+        // Deck Generation & V8.3 Shuffling Algorithm
         function createDeck() {
             let deck = [];
             for (let suit of suits) {
@@ -1056,25 +1102,83 @@
             return deck;
         }
 
-        function shuffle(deck) {
+        function shuffle(deck, level) {
+            // Asas susunan rawak
             for (let i = deck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [deck[i], deck[j]] = [deck[j], deck[i]];
             }
+
+            // V8.3 Algorithm Penyusunan Kad Di Dek berdasarkan Tahap Kesukaran
+            if (level) {
+                let aces = [];
+                let others = [];
+                
+                for (let i = 0; i < deck.length; i++) {
+                    if (deck[i].rank === 1) aces.push(deck[i]);
+                    else others.push(deck[i]);
+                }
+
+                if (level === 'Easy') {
+                    // Letakkan Aces di hujung array supaya ia mudah keluar awal di Stock atau Tableau
+                    deck = [...others, ...aces];
+                } else if (level === 'Master') {
+                    // Sebahagian Aces disorok di pangkal (bawah Stock)
+                    deck = [aces[0], aces[1], ...others, aces[2], aces[3]];
+                } else if (level === 'Expert') {
+                    // Semua Aces disorok di pangkal (jauh di bawah dek Stock)
+                    deck = [...aces, ...others];
+                }
+                // Untuk Medium dan Hard, biar secara rawak sepenuhnya.
+            }
+            
             return deck;
         }
 
-        // Game Initialization
+        // V8.3 Difficulty Initialization
+        function triggerChangeDifficulty() {
+            showModal(
+                "Change Difficulty",
+                "Warning: Changing the difficulty will start a New Game. Your current progress will be lost. Continue?",
+                true,
+                () => {
+                    document.getElementById('difficultyModal').classList.add('active');
+                    document.getElementById('resumeGameBtn').style.display = 'none';
+                }
+            );
+        }
+
         function startNewGame() {
+            document.getElementById('difficultyModal').classList.add('active');
+            document.getElementById('resumeGameBtn').style.display = 'none'; // Hide resume if initiated from 'New Game' header
+        }
+
+        function setDifficulty(level) {
+            document.getElementById('difficultyModal').classList.remove('active');
+            
+            let diffSettings = { level: level, drawCount: 1 };
+            
+            if (level === 'Easy') diffSettings.drawCount = 1;
+            if (level === 'Medium') diffSettings.drawCount = 2;
+            if (level === 'Hard') diffSettings.drawCount = 3;
+            if (level === 'Master') diffSettings.drawCount = 3;
+            if (level === 'Expert') diffSettings.drawCount = 3;
+            
+            finishStartNewGame(diffSettings);
+        }
+
+        function finishStartNewGame(diffSettings) {
             stopTimer();
-            let deck = shuffle(createDeck());
+            let deck = shuffle(createDeck(), diffSettings.level);
+            
             gameState = {
                 timeElapsed: 0,
                 timerStarted: false,
                 stock: [],
                 waste: [],
                 foundations: [[], [], [], []],
-                tableau: [[], [], [], [], [], [], []]
+                tableau: [[], [], [], [], [], [], []],
+                difficulty: diffSettings
             };
 
             for (let i = 0; i < 7; i++) {
@@ -1086,7 +1190,6 @@
             }
             gameState.stock = deck;
             
-            // Set initial state for reset feature and clear history
             initialState = JSON.parse(JSON.stringify(gameState));
             moveHistory = [];
             
@@ -1095,7 +1198,6 @@
             saveToLocalStorage();
         }
 
-        // V8 History Saving
         function saveStateToHistory() {
             moveHistory.push(JSON.parse(JSON.stringify(gameState)));
         }
@@ -1144,7 +1246,6 @@
                 });
             }
             
-            // V7/V8 Auto Solve Verification
             const autoSolveBtn = document.getElementById('btnAutoSolve');
             if (autoSolveBtn) {
                 if (checkAutoSolveAvailable()) {
@@ -1178,6 +1279,7 @@
                 el.addEventListener('dragstart', (e) => {
                     dragSource = sourceData;
                     e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', card.id); 
                     setTimeout(() => el.style.opacity = '0.5', 0);
                 });
                 
@@ -1186,9 +1288,62 @@
                     dragSource = null;
                 });
 
+                el.addEventListener('touchstart', (e) => {
+                    dragSource = sourceData;
+                    touchDragElement = el;
+                    isDragging = false;
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                }, {passive: true});
+
+                el.addEventListener('touchmove', (e) => {
+                    if (!touchDragElement) return;
+                    let dx = e.touches[0].clientX - touchStartX;
+                    let dy = e.touches[0].clientY - touchStartY;
+                    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                        isDragging = true;
+                        e.preventDefault(); 
+                        el.style.zIndex = '9999';
+                        el.style.transition = 'none';
+                        el.style.transform = `translate(${dx}px, ${dy}px)`;
+                    }
+                }, {passive: false});
+
+                el.addEventListener('touchend', (e) => {
+                    if (!touchDragElement) return;
+                    el.style.zIndex = '';
+                    el.style.transition = '';
+                    el.style.transform = '';
+                    
+                    if (isDragging) {
+                        let changedTouch = e.changedTouches[0];
+                        
+                        el.style.display = 'none'; 
+                        let dropTarget = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
+                        el.style.display = ''; 
+                        
+                        let targetSlot = dropTarget ? dropTarget.closest('.foundation, .tableau-slot') : null;
+                        
+                        if (targetSlot) {
+                            let targetType = targetSlot.classList.contains('foundation') ? 'foundation' : 'tableau';
+                            let targetIndex = targetType === 'foundation' ? 
+                                targetSlot.getAttribute('data-f-index') : 
+                                targetSlot.getAttribute('data-t-index');
+                            
+                            if (targetIndex !== null) {
+                                handleMove(dragSource, { type: targetType, index: parseInt(targetIndex) });
+                            }
+                        }
+                    }
+                    
+                    touchDragElement = null;
+                    dragSource = null;
+                    setTimeout(() => { isDragging = false; }, 50);
+                });
+
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    handleSingleClick(sourceData, el);
+                    if (!isDragging) handleSingleClick(sourceData, el);
                 });
             }
             return el;
@@ -1241,22 +1396,30 @@
             });
         }
 
-        // Interactions & Rules
+        // V8.3: Limit Reached telah dibuang supaya pemain boleh reroll bebas
         function drawCard() {
             saveStateToHistory();
             startTimer();
 
             if (gameState.stock.length > 0) {
-                let card = gameState.stock[gameState.stock.length - 1];
+                let drawAmount = Math.min(gameState.difficulty.drawCount, gameState.stock.length);
+                let cardsToDraw = [];
+                for (let i = 0; i < drawAmount; i++) {
+                    cardsToDraw.push(gameState.stock[gameState.stock.length - 1 - i]);
+                }
+
                 animateStateChange(() => {
-                    let c = gameState.stock.pop();
-                    c.faceUp = true;
-                    gameState.waste.push(c);
+                    for(let i=0; i<drawAmount; i++) {
+                        let c = gameState.stock.pop();
+                        c.faceUp = true;
+                        gameState.waste.push(c);
+                    }
                     playSound();
                     renderBoard();
                     saveToLocalStorage();
-                }, [card]);
+                }, cardsToDraw);
             } else if (gameState.waste.length > 0) {
+                // V8.3: Reroll bebas untuk kesemua tahap kesukaran. Had pusingan dibuang.
                 let cards = [...gameState.waste];
                 animateStateChange(() => {
                     gameState.stock = gameState.waste.reverse().map(c => { c.faceUp = false; return c; });
@@ -1388,7 +1551,6 @@
             }, cardsToMove);
         }
 
-        // --- V8 Reset & Undo Features --- //
         function triggerUndo() {
             if (moveHistory.length > 0) {
                 gameState = moveHistory.pop();
@@ -1421,7 +1583,6 @@
             );
         }
 
-        // --- Auto Solve Logic --- //
         function checkAutoSolveAvailable() {
             if (gameState.stock.length > 0) return false;
             
@@ -1464,7 +1625,6 @@
             saveToLocalStorage();
         }
 
-        // --- Hint Feature --- //
         function triggerHint() {
             showModal(
                 "Use Hint?", 
@@ -1574,7 +1734,6 @@
             return -1;
         }
 
-        // Solve Feature
         function triggerSolve() {
             showModal(
                 "Warning", 
@@ -1635,22 +1794,27 @@
                 initialState: initialState,
                 moveHistory: moveHistory
             };
-            localStorage.setItem('solitaire_v8.1_save', JSON.stringify(data));
+            // Updated key for V8.3
+            localStorage.setItem('solitaire_v8.3_save', JSON.stringify(data));
         }
 
         function loadFromLocalStorage() {
-            const saved = localStorage.getItem('solitaire_v8.1_save');
+            const saved = localStorage.getItem('solitaire_v8.3_save');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
                     if (data.gameState && data.gameState.tableau) {
                         gameState = data.gameState;
+                        
+                        if(!gameState.difficulty) {
+                            gameState.difficulty = { level: 'Medium', drawCount: 2 };
+                        }
+
                         initialState = data.initialState || null;
                         moveHistory = data.moveHistory || [];
                         
                         updateTimerDisplay();
                         if (gameState.timerStarted) {
-                            // Resume timer if it was running
                             timerInterval = setInterval(() => {
                                 gameState.timeElapsed++;
                                 updateTimerDisplay();
@@ -1666,6 +1830,14 @@
             }
             return false;
         }
+        
+        function resumePreviousGame() {
+            document.getElementById('difficultyModal').classList.remove('active');
+            if (!loadFromLocalStorage()) {
+                document.getElementById('difficultyModal').classList.add('active');
+                document.getElementById('resumeGameBtn').style.display = 'none';
+            }
+        }
 
         function saveBackup() {
             const dataStr = JSON.stringify(gameState);
@@ -1674,7 +1846,7 @@
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = "solitaire_game_v8.1.json";
+            a.download = "solitaire_game_v8.3.json";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1687,8 +1859,9 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            if (file.name !== "solitaire_game_v8.1.json" && file.name !== "solitaire_game_v8.json" && file.name !== "solitaire_game.json") {
-                showModal("Error", "Invalid file name. Please use 'solitaire_game_v8.1.json'.");
+            // V8.3 File checking
+            if (file.name !== "solitaire_game_v8.3.json" && file.name !== "solitaire_game_v8.2.json" && file.name !== "solitaire_game_v8.1.json" && file.name !== "solitaire_game_v8.json" && file.name !== "solitaire_game.json") {
+                showModal("Error", "Invalid file name. Please use 'solitaire_game_v8.3.json'.");
                 this.value = ''; 
                 return;
             }
@@ -1700,6 +1873,11 @@
                     if (loadedState.stock && loadedState.waste && loadedState.foundations && loadedState.tableau) {
                         stopTimer();
                         gameState = loadedState;
+                        
+                        if(!gameState.difficulty) {
+                            gameState.difficulty = { level: 'Medium', drawCount: 2 };
+                        }
+                        
                         updateTimerDisplay();
                         renderBoard();
                         saveToLocalStorage();
@@ -1715,13 +1893,18 @@
             this.value = ''; 
         });
 
-        // Initialize settings and start game on load
+        // Setup on page load
         window.onload = function() {
             initV6Features();
-            // Try loading from Local Browser cache first
-            if (!loadFromLocalStorage()) {
-                startNewGame();
+            
+            const saved = localStorage.getItem('solitaire_v8.3_save');
+            if (saved) {
+                document.getElementById('resumeGameBtn').style.display = 'block';
+            } else {
+                document.getElementById('resumeGameBtn').style.display = 'none';
             }
+            
+            document.getElementById('difficultyModal').classList.add('active');
         };
     </script>
 </body>
