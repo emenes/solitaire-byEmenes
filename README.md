@@ -1,6 +1,6 @@
-# 🃏 Solitaire (Klondike) - Version 8.1
+# 🃏 Solitaire (Klondike) - Version 8.3
 
-Welcome to **Solitaire by Emenes Interactive**! This is a modern, feature-rich edition of the classic Klondike Solitaire game. Built entirely using native HTML5, CSS3, and pure JavaScript (no external dependencies), this version is enhanced with a live timer, instant local state preservation, full English localization, undo/reset features, custom sound effects, and vibrant visual styling.
+Welcome to **Solitaire by Emenes Interactive**! This is a modern, feature-rich edition of the classic Klondike Solitaire game. Built entirely using native HTML5, CSS3, and pure JavaScript (no external dependencies), this version is optimized across desktop and mobile browsers, equipped with full cross-platform drag-and-drop support, dynamic difficulty selection algorithms, unlimited stock pile rerolls, and comprehensive progress management.
 
 ## 🚀 Play Now (Direct Game Link)
 Launch the game directly in your web browser here:
@@ -8,34 +8,42 @@ Launch the game directly in your web browser here:
 
 ---
 
-## ✨ Features (New in Version 8.1)
+## ✨ Features (Updated in Version 8.3)
 
-*   **⏱️ Live Gameplay Timer:** Score points have been replaced with a real-time live timer. Counting starts automatically on your first move and displays your final completion time upon victory.
+*   **🎯 Dynamic Difficulty Engine (Easy, Medium, Hard, Master, Expert):** 
+    *   Players select their preferred difficulty mode upon launching or starting a new game.
+    *   The shuffling algorithm dynamically adjusts card arrangement based on chosen difficulty:
+        *   **Easy:** Draws 1 card; Aces are prioritized near the top of the deck for an accessible start.
+        *   **Medium & Hard:** Draws 2 and 3 cards respectively; fully randomized standard deck distribution.
+        *   **Master & Expert:** Draws 3 cards; Aces are strategically buried deeper toward the bottom of the stock pile to increase challenge.
+*   **♾️ Unlimited Stock Rerolls (No Limit Restriction):** The Stock pile permits infinite rerolls across all difficulty levels without restrictions or pass limits, keeping gameplay smooth and continuous.
+*   **🎛️ Bottom Navigation Difficulty Control:** A dedicated **Difficulty** button located alongside *Reset*, *Undo*, and *How to Play* allows quick difficulty adjustments with instant modal warnings before resetting to a new deal.
+*   **🌐 Cross-Browser & Mobile Touch Optimization:** Full drag-and-drop compatibility across Firefox, Google Chrome, Edge, Opera, as well as native Touch Event support for tablets and mobile devices.
+*   **⏱️ Live Gameplay Timer:** Score points are replaced with a real-time live timer that triggers on your first move and records final completion time.
 *   **↩️ Undo & 🔄 Reset Controls:** 
     *   **Undo:** Reverts your latest move back to its previous state.
-    *   **Reset:** Resets the board and rearranges all cards back to the exact initial deal, clearing time and move history after a confirmation warning.
-*   **💾 Auto-Save (LocalStorage):** Progress is saved automatically to your browser in real time. Closing or refreshing the browser allows you to resume right where you left off.
-*   **⭐ Smart Auto-Solve:** Once all face-down cards on the Tableau are revealed and the Stock is empty, a compact Auto-Solve button appears next to the Hint button to quickly finish the game.
-*   **📦 Compact Backup Modal:** Unified `Backup` button that opens a clean modal containing options to export or import your `solitaire_game_v8.1.json` backup file.
-*   **🌐 Full English Support:** Clean, fully translated interface and system alert dialogs across all features.
-*   **🎨 Dynamic Cosmetics Sidebar:** Personalize your playing field seamlessly by changing background gradients or selecting custom card back designs.
-*   **🔊 Responsive Synthesized Audio:** Powered by the browser's *Web Audio API*, generating instant audio feedback when drawing or moving cards.
+    *   **Reset:** Resets the board and rearranges all cards back to the exact initial deal, clearing time and move history after confirmation.
+*   **💾 LocalStorage Auto-Save:** Automatically preserves game state, timer, and difficulty settings in real time, allowing players to resume previous sessions seamlessly.
+*   **⭐ Smart Auto-Solve:** Automatically displays an Auto-Solve button once all face-down cards on the Tableau are revealed and the Stock is cleared.
+*   **📦 Backup Modal (v8.3 Support):** Unified `Backup` button allowing users to save or load game progress via `solitaire_game_v8.3.json` files.
+*   **🎨 Cosmetics Customization:** Change background themes and custom card back patterns via the responsive sidebar menu.
+*   **🔊 Synthesized Web Audio API:** Generates real-time audio feedback when drawing or placing cards.
 
 ---
 
 ## 🎮 How to Play (Game Rules)
 
 1.  **Main Objective:** Move all cards to the four **Foundation** slots in the top right corner. Each pile must be built up by suit, starting sequentially from **Ace (A) to King (K)**.
-2.  **Tableau Movement (Bottom Columns):** Cards in the columns can be stacked in descending order, but they must strictly **alternate in color** (e.g., place a Red 6 on top of a Black 7).
+2.  **Tableau Movement (Bottom Columns):** Cards in the columns can be stacked in descending order, strictly **alternating in color** (e.g., place a Red 6 on top of a Black 7).
 3.  **Empty Columns:** If a column on the tableau becomes completely empty, only a **King (K)** (or a valid sequence starting with a King) can be placed into that empty slot.
-4.  **Stock & Waste Pile:** Tap the face-down Stock pile in the top left to draw cards into the Waste pile when looking for new moves.
+4.  **Stock & Waste Pile:** Tap or click the face-down Stock pile in the top left to draw cards into the Waste pile based on your selected difficulty draw count. Infinite recycling of the stock pile is enabled.
 
 ---
 
 ## 🛠️ Technology Stack
 *   **HTML5** - Clean semantic structural setup and accessible UI layout.
-*   **CSS3** - Customized interactive modals, responsive sizing, CSS custom properties for instant styling switches, and keyframe animations.
-*   **Vanilla JavaScript (ES6)** - Client-side state history management, local storage synchronization, predictive layout validation logic, JSON import/export, and procedural Web Audio wave generation.
+*   **CSS3** - Customized interactive modals, responsive grid sizing, custom CSS variables, keyframe animations, and mobile layout breakpoints.
+*   **Vanilla JavaScript (ES6)** - Difficulty deck distribution algorithms, touch event listener implementations, client-side state history tracking, local storage synchronization, JSON backup handlers, and Web Audio API synthesis.
 
 ---
-Published by **EMENES INTERACTIVE** | Stable Release (2026)
+Published by **EMENES INTERACTIVE** | Stable Release Version (2026)
