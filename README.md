@@ -11,8 +11,7 @@ Launch the game directly in your web browser here:
 ## ✨ Features (Updated in Version 8.4)
 
 *   **🎲 Randomized & Optimized Difficulty Engine:** 
-    *   Manual difficulty selection options have been completely removed.
-    *   Every time a game starts, the system automatically assigns a randomized difficulty setting (*Easy - Draw 1*, *Medium - Draw 2*, or *Hard - Draw 3*).
+    *   Every time a game starts, the system automatically assigns a randomized difficulty setting.
     *   **Optimized Shuffling Algorithm:** Card layout distribution is dynamically optimized per run to balance challenge and solvability. Essential cards (like Aces) are strategically dispersed to prevent unfair traps while maintaining an engaging gameplay flow.
 *   **♾️ Unlimited Stock Rerolls (No Limit Restriction):** The Stock pile permits infinite rerolls across all difficulty levels without restrictions or pass limits, keeping gameplay smooth and continuous.
 *   **🎛️ Streamlined Bottom Navigation:** Cleaned up bottom controls containing *Reset*, *Undo*, and *How to Play* buttons for quick access during matches.
